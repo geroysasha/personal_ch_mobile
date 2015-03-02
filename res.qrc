@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/new/zigi">
+        <file>res/001.gif</file>
+    </qresource>
+</RCC>
