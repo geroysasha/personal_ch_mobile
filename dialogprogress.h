@@ -23,8 +23,6 @@ public slots:
 private:
     Ui::DialogProgress *ui;
     void center_display();
-signals:
-    void send(int, void*);
 };
 
 #endif // DIALOGPROGRESS_H

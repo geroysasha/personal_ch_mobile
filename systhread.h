@@ -3,25 +3,28 @@
 
 #include <QDebug>
 #include <QThread>
-#include "core.h"
+#include "coreadapter.h"
 
 class SysThread : public QThread
 {
 Q_OBJECT
 public:
-    SysThread(void *);
+    SysThread();
+    void set_buff(void *);
 public slots:
     void run();
     void deleteLater()
     {
         qDebug()<< "delete thread";
-        QObject::deleteLater();
+        this->disconnect(SIGNAL(work(void*)));
+        this->disconnect(SIGNAL(thread_end(int, void *)));
+        this->disconnect(SIGNAL(started()));
+        this->disconnect(SIGNAL(finished()));
     }
     void request(int, void *);
-
 signals:
     void work(void *);
-    void thread_end();
+    void thread_end(int, void *);
 };
 
 
