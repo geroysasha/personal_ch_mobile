@@ -5,7 +5,6 @@
 
 #include <iostream>
 #include <cstring>
-#include <list>
 #include <vector>
 #include <QObject>
 #include <QDebug>
@@ -17,7 +16,7 @@
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
-#include "core.h"
+#include "const.h"
 
 using namespace std;
 
@@ -27,11 +26,21 @@ class Bluetooth : public QObject
 public:
     Bluetooth();
     virtual ~Bluetooth(){}
-    static list<string> bt_scan_adapter();
+    static vector<string> bt_scan_adapter();
+    int get_remote_rfcomm_port();
+    int get_remote_headset_port();
+    string get_remote_mac_address();
+    string get_local_mac_address();
 private:
-    bool get_rfcomm_port(char *, char *);
-    bool get_headset_port(char *, char *);
-    int get_port(char *, char *);
+    int dev_num;
+    int remote_rfcomm_port;
+    int remote_headset_port;
+    string remote_mac_address;
+    string local_mac_address;
+    bool take_rfcomm_port(char *, char *);
+    bool take_headset_port(char *, char *);
+    int take_port(char *, char *);
+    void take_local_mac_address();
 public slots:
     void bt_search_remote_dev(void *);
     void bt_check_connect_remote_dev(void *);

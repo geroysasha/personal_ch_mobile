@@ -3,7 +3,6 @@
 
 #include <QDebug>
 #include <QThread>
-#include "coreadapter.h"
 
 class SysThread : public QThread
 {

@@ -26,7 +26,7 @@ void DialogSelectList::add_data(vector<string> dev_map)
     str.append(dev_map[0]);
     this->setWindowTitle(str.c_str());
 
-    for (int i = 1; i < dev_map.size(); i++)
+    for (unsigned i = 1; i < dev_map.size(); i++)
     {
         str = dev_map[i];
         data << str.c_str();
