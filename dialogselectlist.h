@@ -6,9 +6,10 @@
 #include <QDebug>
 #include <QStringList>
 #include <QStringListModel>
-#include <map>
+#include <vector>
 #include <iostream>
 #include <cstring>
+#include "const.h"
 
 using namespace std;
 
@@ -26,14 +27,15 @@ public:
 private:
     Ui::DialogSelectList *ui;
     void center_display();
-    void add_data(void *);
-signals:
-    void send(int, void*);
+    void add_data(vector<string>);
 public slots:
-    void run(void *);
+    void run(vector<string>);
 private slots:
     void on_pushButton_select_clicked();
     void on_pushButton_close_clicked();
+    //void on_listView_clicked(const QModelIndex &index);
+signals:
+    void send(int, vector<string>);
 };
 
 #endif // DIALOGSELECTLIST_H

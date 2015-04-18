@@ -1,10 +1,12 @@
 #ifndef BLUETOOTH_H
 #define BLUETOOTH_H
 
+#define LENGTH_MAC_ADD 17
+
 #include <iostream>
 #include <cstring>
 #include <list>
-#include <map>
+#include <vector>
 #include <QObject>
 #include <QDebug>
 #include <time.h>
@@ -26,11 +28,16 @@ public:
     Bluetooth();
     virtual ~Bluetooth(){}
     static list<string> bt_scan_adapter();
+private:
+    bool get_rfcomm_port(char *, char *);
+    bool get_headset_port(char *, char *);
+    int get_port(char *, char *);
 public slots:
     void bt_search_remote_dev(void *);
+    void bt_check_connect_remote_dev(void *);
     void deleteLater(){
         qDebug()<< "delete bluetooth";
-        QObject::deleteLater();
+        this->disconnect(SIGNAL(request(int,void*)));
     }
 signals:
     void request(int, void *);

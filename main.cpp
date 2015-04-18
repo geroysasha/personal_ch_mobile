@@ -5,16 +5,43 @@
 
 #include "mainwindow.h"
 #include "coreadapter.h"
+#include "dialogprogress.h"
+#include "dialogselectlist.h"
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    MainWindow w;
 
+    MainWindow w;
+    DialogProgress dlgProgress;
+    DialogSelectList dlgSelectList;
     CoreAdapter ca;
-    void *data;
-    data = &w;
-    ca.core_receiver(HANDLER_CORE_LOAD_POINTER, data);
+
+    QObject::connect(&ca
+                     , SIGNAL(dialog_progress_show())
+                     , &dlgProgress
+                     , SLOT(run()));
+    QObject::connect(&ca
+                     , SIGNAL(dialog_progress_stop())
+                     , &dlgProgress
+                     , SLOT(stop()));
+    QObject::connect(&ca
+                     , SIGNAL(dialog_select_list_show(vector<string>))
+                     , &dlgSelectList
+                     , SLOT(run(vector<string>)));
+    QObject::connect(&ca
+                     , SIGNAL(mainwindow_selected_remote_dev(vector<string>, bool))
+                     , &w
+                     , SLOT(selected_remote_dev(vector<string>, bool)));
+    QObject::connect(&dlgSelectList
+                     , SIGNAL(send(int, vector<string>))
+                     , &ca
+                     , SLOT(receiver(int, vector<string>)));
+    QObject::connect(&w
+                     , SIGNAL(send(int, int))
+                     , &ca
+                     , SLOT(receiver(int, int)));
+
 
     QDesktopWidget desktop;
     QRect rect = desktop.availableGeometry(desktop.primaryScreen());

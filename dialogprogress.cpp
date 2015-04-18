@@ -32,7 +32,6 @@ void DialogProgress::run()
 {
     this->show();
     this->center_display();
-    this->exec();
 }
 
 void DialogProgress::stop()
