@@ -24,18 +24,20 @@ class DialogSelectList : public QDialog
 public:
     explicit DialogSelectList(QWidget *parent = 0);
     ~DialogSelectList();   
+    void run(vector<string>*);
 private:
     Ui::DialogSelectList *ui;
     void center_display();
-    void add_data(vector<string>);
-public slots:
-    void run(vector<string>);
+    void add_data(vector<string>*);
+    vector<string> *dev;
+
 private slots:
     void on_pushButton_select_clicked();
     void on_pushButton_close_clicked();
     //void on_listView_clicked(const QModelIndex &index);
 signals:
-    void send(int, vector<string>);
+    //void send(int, vector<string>&);
+    void dialogselectlist_select(vector<string> *);
 };
 
 #endif // DIALOGSELECTLIST_H

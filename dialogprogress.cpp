@@ -9,10 +9,6 @@ DialogProgress::DialogProgress(QWidget *parent) :
     ui(new Ui::DialogProgress)
 {
     ui->setupUi(this);
-    QMovie *movie = new QMovie(":/new/zigi/res/001.gif");
-
-    ui->label->setMovie(movie);
-    movie->start();
 }
 
 DialogProgress::~DialogProgress()
@@ -32,9 +28,31 @@ void DialogProgress::run()
 {
     this->show();
     this->center_display();
+
+    count = 0;
+    timer = new QTimer(this);
+    connect( timer, SIGNAL(timeout()), this, SLOT(updateProgressBar()) );
+    timer->start(100);
 }
 
 void DialogProgress::stop()
 {
+    timer->stop();
+    delete timer;
+    timer = 0;
     this->close();
+}
+
+void DialogProgress::updateProgressBar()
+{
+    QString frame = ":/new/res/res/";
+    frame.append(count + '0');
+    frame.append(".jpg");
+    QPixmap mypix(frame);
+    ui->label->setPixmap(mypix);
+    count++;
+    if(count == 8)
+    {
+        count = 0;
+    }
 }

@@ -55,7 +55,7 @@
     <string/>
    </property>
    <property name="pixmap">
-    <pixmap resource="res.qrc">:/new/zigi/res/No.jpg</pixmap>
+    <pixmap resource="res.qrc">:/new/res/res/No.jpg</pixmap>
    </property>
    <property name="scaledContents">
     <bool>true</bool>

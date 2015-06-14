@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QDesktopWidget>
 #include <QRect>
+#include <QTimer>
 
 namespace Ui {
 class DialogProgress;
@@ -20,9 +21,12 @@ public:
 public slots:
     void run();
     void stop();
+    void updateProgressBar();
 private:
     Ui::DialogProgress *ui;
     void center_display();
+    QTimer *timer;
+    int count;
 };
 
 #endif // DIALOGPROGRESS_H

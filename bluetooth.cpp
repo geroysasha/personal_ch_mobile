@@ -1,56 +1,6 @@
 
 #include "bluetooth.h"
 #include <QDebug>
-Bluetooth::Bluetooth()
-{
-
-}
-
-void Bluetooth::bt_search_remote_dev(void *data)
-{
-    dev_num = *static_cast<int *>(data);
-    char hci = dev_num + '0';
-    string str = "";
-
-    vector<string> dev_map;
-
-    char cmd[strlen("hcitool -i ") + strlen("hci") +strlen(&hci) + strlen(" scan")];
-    strcpy(cmd, "hcitool -i ");
-    strcat(cmd, "hci");
-    strcat(cmd, &hci);
-    strcat(cmd, " scan");
-    char buf[BUFSIZ];
-
-    FILE *ptr;
-
-    if ((ptr = popen(cmd, "r")) != NULL)
-    {
-        dev_map.push_back(&hci);
-
-         while (fgets(buf, BUFSIZ, ptr) != NULL)
-         {
-             if(((string) buf).find(":") != string::npos)
-             {
-                 str.append(((string) buf).substr(((string) buf).find(":") - 2, ((string) buf).find(":") + 14));
-                 str.append("\n");
-                 str.append(((string) buf).substr(((string) buf).find(":") + 16, ((string) buf).length()));
-                 dev_map.push_back(str);
-                 str.clear();
-              }
-         }
-         (void) pclose(ptr);
-    }
-    if(dev_map.size() != 1)
-    {
-        data = &dev_map;
-        emit request(HANDLER_CORE_REQUEST_SEARCH_REMOTE_DEVICE, data);
-    } else
-    {
-        char err[] = "No find remote devices";
-        emit request(HANDLER_CORE_SYS_ERROR, &err);
-    }
-    sleep(1);
-}
 
 vector<string> Bluetooth::bt_scan_adapter()
 {
@@ -70,7 +20,137 @@ vector<string> Bluetooth::bt_scan_adapter()
                 }
             }
     (void) pclose(ptr);
+
     return vec;
+}
+
+Bluetooth::Bluetooth()
+{
+    th = new QThread;
+    this->moveToThread(th);
+}
+
+void Bluetooth::bluetooth_init_dialogs()
+{
+    dlgProgress = new DialogProgress[1];
+
+    QObject::connect( this,
+                      SIGNAL(dlgProgress_run()),
+                      dlgProgress,
+                      SLOT(run())
+                      );
+    QObject::connect( this,
+                      SIGNAL(dlgProgress_stop()),
+                      dlgProgress,
+                      SLOT(stop())
+                      );
+}
+
+void Bluetooth::signals_and_slot(char *method)
+{
+
+    QObject::connect( th, SIGNAL(started()),
+                      this, method );
+
+}
+
+void Bluetooth::bt_search_remote_dev()
+{
+
+    emit dlgProgress_run();
+
+    char hci = adapter_number + '0';
+    string str = "";
+
+    vector<string> *dev_map = new vector<string>;
+
+    char cmd[strlen("hcitool -i ") + strlen("hci") +strlen(&hci) + strlen(" scan")];
+    strcpy(cmd, "hcitool -i ");
+    strcat(cmd, "hci");
+    strcat(cmd, &hci);
+    strcat(cmd, " scan");
+    char buf[BUFSIZ];
+
+    FILE *ptr;
+
+    if ((ptr = popen(cmd, "r")) != NULL)
+    {
+        dev_map->push_back(&hci);
+
+         while (fgets(buf, BUFSIZ, ptr) != NULL)
+         {
+             if(((string) buf).find(":") != string::npos)
+             {
+                 str.append(((string) buf).substr(((string) buf).find(":") - 2, ((string) buf).find(":") + 14));
+                 str.append("\n");
+                 str.append(((string) buf).substr(((string) buf).find(":") + 16, ((string) buf).length()));
+                 dev_map->push_back(str);
+                 str.clear();
+              }
+         }
+         (void) pclose(ptr);
+    }
+
+    dlgProgress_stop();
+    emit bluetooth_remote_device(dev_map);
+}
+
+void Bluetooth::remote_dev(int adptr_number)
+{
+    adapter_number = adptr_number;
+
+
+    th->quit();
+    th->wait();
+    th->disconnect(SIGNAL(started()));
+
+    signals_and_slot( (char*) SLOT(bt_search_remote_dev()) );
+
+    th->start();
+    sleep(1);
+}
+
+void Bluetooth::check_device(vector<string> *vec_devices)
+{
+    vec_dev = *vec_devices;
+
+    th->quit();
+    th->wait();
+    th->disconnect(SIGNAL(started()));
+
+    signals_and_slot((char*)  SLOT(bt_check_connect_remote_dev()));
+
+    th->start();
+    sleep(1);
+}
+
+void Bluetooth::bt_check_connect_remote_dev()
+{
+    emit dlgProgress_run();
+
+    char hci[strlen( ((string) (vec_dev)[0]).c_str() )];
+    char mac[strlen( ((string) (vec_dev)[1]).substr(0, LENGTH_MAC_ADD).c_str() )];
+
+    strcpy(hci, ((string) (vec_dev)[0]).c_str() );
+    strcpy(mac, ((string) (vec_dev)[1]).substr(0, LENGTH_MAC_ADD).c_str() );
+
+    take_local_mac_address();
+    if(take_rfcomm_port(hci, mac) && take_headset_port(hci, mac))
+    {
+
+        remote_mac_address.clear();
+        remote_mac_address.append(mac);
+
+        bluetooth_checked_remote_device(&vec_dev, true);
+        //emit request(HANDLER_CORE_CHECK_CONNECT_REMOTE_DEVICE_OK, &vec);
+    } else
+    {
+        bluetooth_checked_remote_device(&vec_dev, false);
+        //char err[] = "Error this is divice not support!";
+        //emit request(HANDLER_CORE_CHECK_CONNECT_REMOTE_DEVICE_ERROR, &vec);
+        //emit request(HANDLER_CORE_SYS_ERROR, err);
+    }
+    emit dlgProgress_stop();
 }
 
 bool Bluetooth::take_rfcomm_port(char *hci, char *mac){
@@ -111,15 +191,7 @@ bool Bluetooth::take_headset_port(char *hci, char *mac){
 
     if(remote_headset_port != 99)
     {
-//        char buf[32];
-//        write(s, "ATD0000000000", 13);
-//        sleep(0.5);
-//        recv(s, buf, sizeof(buf), 0);
-//        write(s, "AT+CHUP;\r", 10);
-//        sleep(0.5);
-//        recv(s, buf, sizeof(buf), 0);
-
-        return true;
+        return true;//keypass(hci, mac);
     }
     else
     {
@@ -139,7 +211,6 @@ int Bluetooth::take_port(char *cmd, char *mac)
             {
                 if(((string) buf).find(mac) != string::npos || find == true)
                 {
-                    qDebug()<<buf;
                     if(((string) buf).find("Channel") != string::npos)
                     {
                         if( atoi(((string) buf).substr(((string) buf).find(":") + 2,((string) buf).length() - 1).c_str()) < port)
@@ -163,40 +234,13 @@ int Bluetooth::take_port(char *cmd, char *mac)
     return port;
 }
 
-void Bluetooth::bt_check_connect_remote_dev(void *data)
-{
-    vector<string> vec = *static_cast<vector<string> *>(data);
 
-    char hci[strlen(static_cast<string>(vec[0]).c_str())];
-    char mac[strlen(static_cast<string>(vec[1]).substr(0, LENGTH_MAC_ADD).c_str())];
-
-    strcpy(hci, static_cast<string>(vec[0]).c_str());
-    strcpy(mac, static_cast<string>(vec[1]).substr(0, LENGTH_MAC_ADD).c_str());
-
-    data = &vec;
-    take_local_mac_address();
-    if(take_rfcomm_port(hci, mac) && take_headset_port(hci, mac))
-    {
-
-        remote_mac_address.clear();
-        remote_mac_address.append(mac);
-
-        emit request(HANDLER_CORE_CHECK_CONNECT_REMOTE_DEVICE_OK, &vec);
-    }
-    else
-    {
-        char err[] = "Error this is divice not support!";
-        emit request(HANDLER_CORE_CHECK_CONNECT_REMOTE_DEVICE_ERROR, &vec);
-        emit request(HANDLER_CORE_SYS_ERROR, err);
-    }
-    sleep(1);
-}
 
 void Bluetooth::take_local_mac_address()
 {
 
     char buf[BUFSIZ];
-    char num = dev_num + '0';
+    char num = adapter_number + '0';
     char hci[5];
 
     strcpy(hci, "hci0");
@@ -223,7 +267,7 @@ void Bluetooth::take_local_mac_address()
     } else
     {
         char err[] = "Error in get_local_mac_address(), <<popen>> returtn NULL";
-        emit request(HANDLER_CORE_SYS_ERROR, err);
+        //emit request(HANDLER_CORE_SYS_ERROR, err);
     }
 
 }
@@ -247,3 +291,58 @@ string Bluetooth::get_local_mac_address()
 {
     return local_mac_address;
 }
+
+//bool Bluetooth::keypass(char *hci, char *mac)
+//{
+//    bool stat = false;
+//    string request;
+//    char cmd[strlen("echo \"0000\" | bluez-simple-agent hci 00:00:00:00:00:00 remove") + strlen(hci) + 1];
+
+//    popen_interaction("bluez-simple-agent -h", request);
+
+//    if(request.find("Usage:") != string::npos)
+//    {
+//        strcpy(cmd, "echo \"0000\" | bluez-simple-agent hci");
+//        strcat(cmd, hci);
+//        strcat(cmd, " ");
+//        strcat(cmd, mac);
+//    }else
+//    {
+//        strcpy(cmd, "echo \"0000\" | simple-agent hci");
+//        strcat(cmd, hci);
+//        strcat(cmd, " ");
+//        strcat(cmd, mac);
+//    }
+
+//    popen_interaction(cmd, request);
+//    if(request.find("Already Exists") != string::npos)
+//    {
+//        strcat(cmd, " remove");
+//        popen_interaction(cmd, request);
+//    }
+
+//    if(request.find("New device") != string::npos)
+//    {
+//        stat = true;
+//    }
+
+//    return stat;
+//}
+
+
+//void Bluetooth::popen_interaction(char *cmd, string &str)
+//{
+//    char buf[BUFSIZ];
+//    FILE *ptr;
+//    str.clear();
+
+//    qDebug()<<cmd;
+//    if ((ptr = popen(cmd, "r")) != NULL)
+//    {
+//        while (fgets(buf, BUFSIZ, ptr) != NULL)
+//        {
+//            str.append(buf);
+//        }
+//    }
+//    (void) pclose(ptr);
+//}

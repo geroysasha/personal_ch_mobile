@@ -1,63 +1,70 @@
 #ifndef CORE_H
 #define CORE_H
 
+#include <QProcess>
 #include "bluetooth.h"
-#include "systhread.h"
-#include "const.h"
+#include "dialogselectlist.h"
+#include "dialogalert.h"
 
 class SysThread;
 
 class Core : public QObject
 {
     Q_OBJECT
-public:
-    static Core& Instance()
-    {
-        static Core s;
-        return s;
-    }
-    void core_thread_connect(SysThread *, QObject *, char *, void *);
-    vector<string> get_buff_vector();
-    char* get_buff_char();
-    bool get_buff_bool();
-
-public slots:
-    void core_handler(int, void *);
-    void receiver(int, void *);
-    void receiver(int, vector<string>);
-    void receiver(int, int);
-    void receiver(int, char *);
-
-signals:
-    void dialog_progress_show();
-    void dialog_progress_stop();
-    void dialog_select_list_show(vector<string>);
-    void dialog_alert_show(char *mess);
-    void mainwindow_selected_remote_dev(vector<string>, bool);
-    void mainwindow_btn_state(bool btn_start, bool btn_stop);
-    void pjsua_account_create(void *);
-    void pjsua_account_destroy();
-
 private:
+    static Core *s;
     Core();
     virtual ~Core()
     {
-        delete[] bt;
-        delete[] sysThread;
+        for(unsigned i = 0; i < buff_vec.size(); i++)
+        {
+            delete bt[i];
+        }
+
+        delete bt;
+        delete [] dlgSelectList;
+        delete [] dlgAlert;
+        qDebug()<<"delete Core";
     }
 
     Core(Core const&);
     Core& operator= (Core const&);
 
-    void bt_adapter_checked();
-
     Bluetooth **bt;
-    SysThread **sysThread;
-
     vector<string> buff_vec;
-    char *buff_char;
-    bool buff_bool;
-    int buff_int;
+    DialogSelectList *dlgSelectList;
+    DialogAlert *dlgAlert;
+    void bt_adapter_checked();
+public:
+
+    static Core* Instance()
+    {
+        if(!s)
+        {
+             s = new Core();
+        }
+        return s;
+    }
+
+public slots:
+    void core_init_dialogs();
+    void mainwindow_remote_device( int adapter_number );
+    void mainwindow_start_listener(string *registration_string);
+    void mainwindow_stop_listener();
+    void mainwindow_close_applicatrion();
+    void bluetooth_remote_device(vector<string> *vec_devices);
+    void bluetooth_checked_remote_device(vector<string> *vec_devices, bool stat);
+    void dialogselectlist_select(vector<string> *select_device);
+    void core_logger(char *mess);
+
+
+signals:
+    void mainwindow_selected_remote_dev(vector<string> *data, bool stat);
+    void mainwindow_logger(char *);
+    void mainwindow_btn_state(bool btn_start, bool btn_stop);
+    void mobilechannel_pjsua_account_create(Bluetooth *ptr, const char *field_email, const char *field_code);
+    void mobilechannel_pjsua_account_destroy();
+    void close_application();
 
 };
 

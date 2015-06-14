@@ -39,7 +39,9 @@ SOURCES += main.cpp\
     systhread.cpp \
     bluetooth.cpp \
     mobilechannel.cpp \
-    dialogalert.cpp
+    dialogalert.cpp \
+    posthttp.cpp \
+    calltimer.cpp
 
 HEADERS  += mainwindow.h \
     core.h \
@@ -49,7 +51,9 @@ HEADERS  += mainwindow.h \
     bluetooth.h \
     const.h \
     mobilechannel.h \
-    dialogalert.h
+    dialogalert.h \
+    posthttp.h \
+    calltimer.h
 
 FORMS    += mainwindow.ui \
     dialogprogress.ui \

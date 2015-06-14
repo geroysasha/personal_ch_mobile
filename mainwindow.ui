@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>442</width>
-    <height>236</height>
+    <height>405</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -30,14 +30,65 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
-     <widget class="QLabel" name="label_device">
+    <item row="9" column="0" colspan="2">
+     <widget class="QPushButton" name="pushButton_clearLog">
       <property name="text">
-       <string>Device</string>
+       <string>Clear log</string>
       </property>
      </widget>
     </item>
-    <item row="1" column="0" colspan="2">
+    <item row="7" column="1">
+     <widget class="QPushButton" name="pushButton_stop">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>STOP</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QPushButton" name="button_scan">
+      <property name="text">
+       <string>scan</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="0">
+     <widget class="QPushButton" name="pushButton_start">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>START</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0">
+     <widget class="QCheckBox" name="checkBox">
+      <property name="text">
+       <string>save settings</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0">
+     <widget class="QLabel" name="label_code">
+      <property name="text">
+       <string>Registration code</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLineEdit" name="lineEdit_email">
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="0">
+     <widget class="QLineEdit" name="lineEdit_code"/>
+    </item>
+    <item row="1" column="0">
      <widget class="QLineEdit" name="lineEdit_device">
       <property name="enabled">
        <bool>false</bool>
@@ -56,47 +107,39 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="2">
-     <widget class="QPushButton" name="button_scan">
+    <item row="0" column="0">
+     <widget class="QLabel" name="label_device">
       <property name="text">
-       <string>scan</string>
+       <string>Device</string>
       </property>
      </widget>
     </item>
     <item row="2" column="0">
-     <widget class="QLabel" name="label_code">
+     <widget class="QLabel" name="label_mail">
       <property name="text">
-       <string>Registration code</string>
+       <string>Your e-mail</string>
       </property>
      </widget>
     </item>
-    <item row="3" column="0" colspan="3">
-     <widget class="QLineEdit" name="lineEdit_code"/>
-    </item>
-    <item row="4" column="0">
-     <widget class="QCheckBox" name="checkBox">
-      <property name="text">
-       <string>save code</string>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="2">
-     <widget class="QPushButton" name="pushButton_stop">
+    <item row="8" column="0" colspan="2">
+     <widget class="QPlainTextEdit" name="logText">
       <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="acceptDrops">
        <bool>false</bool>
       </property>
-      <property name="text">
-       <string>STOP</string>
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOn</enum>
       </property>
-     </widget>
-    </item>
-    <item row="5" column="0" colspan="2">
-     <widget class="QPushButton" name="pushButton_start">
-      <property name="enabled">
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+      <property name="centerOnScroll">
        <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>START</string>
       </property>
      </widget>
     </item>

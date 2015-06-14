@@ -15,12 +15,10 @@ class DialogAlert : public QDialog
 public:
     explicit DialogAlert(QWidget *parent = 0);
     ~DialogAlert();
-    
+    void run(char *);
+
 private:
     Ui::DialogAlert *ui;
-
-public slots:
-    void run(char *);
 
 private slots:
     void on_pushButton_ok_clicked();
